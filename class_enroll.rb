@@ -1,19 +1,46 @@
 #!/usr/bin/env ruby
+require 'csv'
+require_relative 'student'
+require_relative 'course'
 
 module ClassEnroll
+
+    @@students = Hash.new
+    @@courses = Hash.new
+
     # reads student data from csv input file
-    # and stores it in a array of student objects
+    # and stores it in a hash of student objects
     def store_student_data
         incsv = ARGV[0]
-        input = CSV.read(incsv)
-        student1 = Student.new(input[0].to_s, input[1].to_i, input[2].to_i, input[3].to_i, input[4].to_s)
-        puts student1
+        CSV.foreach((incsv), headers: true, col_sep: ",") do |row|
+            student = Student.new(row["StudentId"].to_s, row["Units"].to_i, row["Num-Courses"].to_i, row["Prereqs"].to_s, row["Choices"].to_s)
+            @@students.store(row["StudentId"], student)
+        end
+
+        @@students.each do |id, student|
+            print student.student_id,
+            puts
+            print student.courses_wanted, "\n"
+        end
     end
     
     # reads course data from csv input file
-    # and stores it in a array of course objects
+    # and stores it in a hash of course objects
+
     def store_course_data
+        file = ARGV[0]
+        CSV.foreach((file), headers: true, col_sep: ",") do |row|
+            course = Course.new(row["Course-Num"].to_s, row["Num-Sections"].to_i, row["Min-Enroll"].to_i, row["Max-Enroll"].to_i, row["Prerequisites"].to_s)
+            @@courses.store(row["Course-Num"], course)
+        end
+
+        @@courses.each do |num, course|
+            print course.course_num,
+            puts
+            print course.prereq_courses, "\n"
+        end
     end
+
 
     # creates suggested enrollment plan per student
     def generate_student_plan
@@ -34,10 +61,10 @@ module ClassEnroll
     end
 end
 
-require 'csv'
-#require_relative "course.rb"
-require_relative "student.rb"
-#require_relative "section.rb"
+
 include ClassEnroll
 
-ClassEnroll.store_student_data
+if __FILE__ == $0
+    store_course_data
+    #store_student_data
+end
