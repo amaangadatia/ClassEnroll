@@ -1,3 +1,6 @@
+#require_relative "class_enroll.rb"
+#include ClassEnroll
+
 class Course
     attr_accessor :course_num, :num_sections, :prereq_courses, :sections
 
