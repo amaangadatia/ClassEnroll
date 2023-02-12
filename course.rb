@@ -1,7 +1,7 @@
-require_relative 'class_enroll'
+#require_relative 'class_enroll'
 
 class Course
-    include ClassEnroll
+    #include ClassEnroll
 
     attr_accessor :course_num, :num_sections, :min_enroll, :max_enroll, :prereq_courses
     def initialize(course_num, num_sections, min_enroll, max_enroll, prereq_courses)
