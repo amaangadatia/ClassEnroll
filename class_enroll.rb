@@ -2,6 +2,7 @@
 require 'csv'
 require_relative 'student'
 require_relative 'course'
+require_relative 'section'
 
 module ClassEnroll
 
@@ -89,8 +90,49 @@ module ClassEnroll
 
     end
 
+    # checks if student submitted course requests
+    def check_course_choices(student)
+        if student.num_courses_wanted > 0 and not(student.courses_wanted.include? "None")
+            return true
+        else
+            return false
+        end
+    end
+
+    # checks if student meets the prerequisites for a course
+    def meets_prereqs(student, course)
+        # checks if the course has no prerequisites
+        if course.prereq_courses.length() == 1 and course.prereq_courses.include? "None"
+            return true
+        end
+
+        # if the course does have prerequisites, checks if the student meets them
+        course.prereq_courses.each do |preq_course|
+            if not(student.prereqs_completed.include? preq_course)
+                return false
+            end
+        end
+        return true
+    end
+
+
     # creates suggested enrollment plan per student
     def generate_student_plan
+        @@students.each do |id, student|
+            #print id, check_course_choices(student), "\n"
+            if check_course_choices(student)
+                student.courses_wanted.each do |course_id|
+                    course = @@courses[course_id]
+                    if meets_prereqs(student, course)
+                        course.enroll_student(student)
+                    end
+                    # print "Before meets_prereq: " + course_id, "\n"
+                    # print id, meets_prereqs(student, course_id), "\n"
+                end
+            else
+                print "Student " + id.to_s + " has no choices.\n"
+            end
+        end
     end
 
     # creates suggested enrollment plan per course
@@ -112,9 +154,10 @@ end
 include ClassEnroll
 
 if __FILE__ == $0
-    #store_course_data
-    #store_student_data
+    store_course_data
+    store_student_data
+    generate_student_plan
     #output_courses_enroll_plan
     #output_students_enroll_plan
-    output_summary_enroll_plan(5, 4, 2)
+    #output_summary_enroll_plan(5, 4, 2)
 end
