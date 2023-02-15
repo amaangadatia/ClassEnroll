@@ -8,6 +8,9 @@ module ClassEnroll
 
     @@students = Hash.new
     @@courses = Hash.new
+    @@total_students_enrolled = 0
+    @@total_sections_torun = 0
+    @@total_sections_tocancel = 0
 
     # reads student data from csv input file
     # and stores it in a hash of student objects
@@ -51,12 +54,31 @@ module ClassEnroll
         #     File.delete(outcsv)
         # end
 
-        headers = "Course-Num,Section-Num,Roster,Num-Enroll,Balance,Status\n"
-        File.open(outcsv, "w") {|f| f.write(headers)}
+        headers = ["Course-Num","Section-Num","Roster","Num-Enroll","Balance","Status"]
+        CSV.open(outcsv, "w") do |csv|
+            csv << headers
+            @@courses.each do |course_num, course|
+                course.sections.each do |section_num, section|
+                    balance = course.max_enroll - section.num_studs_enrolled
+                    @@total_students_enrolled += section.num_studs_enrolled
 
-        CSV.foreach(("courses_out.csv"), headers: true, col_sep: ",") do |row|
-            File.open(outcsv, "a") {|f| f.write(row)}
-        end        
+                    if section.num_studs_enrolled < course.min_enroll
+                        status = "Cancel"
+                        @@total_sections_tocancel += 1
+                    else
+                        status = "Ok"
+                        @@total_sections_torun += 1
+                    end
+
+                    csv << [course_num, section_num, section.students.join(";"), section.num_studs_enrolled.to_s, balance.to_s, status]
+            end
+        end
+
+        # File.open(outcsv, "w") {|f| f.write(headers)}
+
+        # CSV.foreach(("courses_out.csv"), headers: true, col_sep: ",") do |row|
+        #     File.open(outcsv, "a") {|f| f.write(row)}
+        # end        
     end
 
     def output_students_enroll_plan
@@ -66,15 +88,23 @@ module ClassEnroll
         #     File.delete(outcsv)
         # end
 
-        headers = "StudentId,Courses,Num-Req,Reason\n"
-        File.open(outcsv, "w") {|f| f.write(headers)}
-
-        CSV.foreach(("students_out.csv"), headers: true, col_sep: ",") do |row|
-            File.open(outcsv, "a") {|f| f.write(row)}
+        headers = ["StudentId","Courses","Num-Req","Reason"]
+        CSV.open(outcsv, "w") do |csv|
+            csv << headers
+            @@students.each do |id, student|
+                csv << [id, student.courses_enrolled_in.join(";"), student.num_courses_wanted.to_s, "TBD"]
+                #row = id + "," + student.courses_enrolled_in.join(";") + "," + student.num_courses_wanted.to_s + "," + "TBD"
+            end
         end
+        # File.open(outcsv, "w") {|f| f.write(headers)}
+
+        
+        # CSV.foreach(("students_out.csv"), headers: true, col_sep: ",") do |row|
+        #     File.open(outcsv, "a") {|f| f.write(row)}
+        # end
     end
 
-    def output_summary_enroll_plan(num_students, num_courses_torun, num_courses_tocancel)
+    def output_summary_enroll_plan
         outcsv = ARGV[4]
 
         # if File.exists?(outcsv)
@@ -82,9 +112,9 @@ module ClassEnroll
         # end
 
         File.open(outcsv, "w") { |f|
-            f.write("Number of students: " + num_students.to_s + "\n")
-            f.write("Number of course sections that can run: " + num_courses_torun.to_s + "\n")
-            f.write("Number of course sections that may be cancelled: " + num_courses_tocancel.to_s + "\n")
+            f.write("Number of students: " + @@total_students_enrolled.to_s + "\n")
+            f.write("Number of course sections that can run: " + @@total_sections_torun.to_s + "\n")
+            f.write("Number of course sections that may be cancelled: " + @total_sections_tocancel.to_s + "\n")
         }
     
 
@@ -116,14 +146,23 @@ module ClassEnroll
     end
 
 
-    # creates suggested enrollment plan per student
-    def generate_student_plan
+    # creates enrollment plans per student and per course, respectively
+    # creates summary of general enrollment plan in txt file
+    # utilizes the three methods above
+    def generate_enroll_plan
+        # sorts students by number of units completed in descending order
+        # so priority goes to student(s) with higher amount of units
+        @@students.sort_by {|id, student| -student.num_units_done}
+
         @@students.each do |id, student|
             #print id, check_course_choices(student), "\n"
             if check_course_choices(student)
                 student.courses_wanted.each do |course_id|
                     course = @@courses[course_id]
-                    if meets_prereqs(student, course)
+                    if meets_prereqs(student, course) and 
+                        (student.courses_enrolled_in.length == 2 or 
+                        student.courses_enrolled_in.length == student.num_courses_wanted)
+
                         course.enroll_student(student)
                     end
                     # print "Before meets_prereq: " + course_id, "\n"
@@ -135,19 +174,6 @@ module ClassEnroll
         end
     end
 
-    # creates suggested enrollment plan per course
-    def generate_course_plan
-    end
-
-    # creates txt file with a summary of the general enrollment plan
-    def generate_summary_plan
-    end
-
-    # creates enrollment plans per student and per course, respectively
-    # creates summary of general enrollment plan in txt file
-    # utilizes the three methods above
-    def generate_enroll_plan
-    end
 end
 
 
@@ -156,8 +182,8 @@ include ClassEnroll
 if __FILE__ == $0
     store_course_data
     store_student_data
-    generate_student_plan
-    #output_courses_enroll_plan
-    #output_students_enroll_plan
-    #output_summary_enroll_plan(5, 4, 2)
+    generate_enroll_plan
+    output_courses_enroll_plan
+    output_students_enroll_plan
+    output_summary_enroll_plan
 end

@@ -14,17 +14,47 @@ class Course
         @sections = Hash.new
     end
 
-    # creates section for a course
+    # checks if a section for a course needs to be created
+    def get_section_to_put_student_in
+        # create section if no section exists
+        if @sections.length == 0
+            section = Section.new(course_num, 1)
+            @sections.store(1, section)
+            return section
+        end
+
+        # returns a section if it hasn't reached it's minimum enrollment
+        @sections.each do |section_num, section|
+            if section.num_studs_enrolled < @min_enroll 
+                return section
+            end
+        end
+
+        # if existing sections have reached minimum enrollment
+        # create a new section if course hasn't reached max allowed sections
+        if @sections.length < @num_sections
+            new_section_number = section_num + 1
+            section = Section.new(course_num, new_section_number)
+            @sections.store(new_section_number, section)
+            return section
+        end      
+        
+        # sort sections by least enrollment to balance enrollment across sections
+        @sections = @sections.sort_by {|section_num, section| [section.num_studs_enrolled, section.section_num]}.to_h
+        return @sections.values[0]
+        
+    end
+
+    
     def enroll_student(student)
-        # check if section needs to be created or if section exists
-        # create section if no section exists or if existing section has already reached minimum capacity
-        # add section to section hash map
+        section = get_section_to_put_student_in
+
         # add student to section
+        section.add_student(student)
 
-        # if section exists, add student
         # Update student object with course id they were put in
+        student.enrolled_in(@course_num)
+    end
+    
 
-        # section = Section.new(course_num, section_num)
-        # @sections.store(section_num, section)
-    end    
 end
