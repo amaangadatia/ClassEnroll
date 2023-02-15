@@ -3,7 +3,7 @@
 class Student
     #include ClassEnroll
 
-    attr_reader :student_id, :num_units_done, :num_courses_wanted, :prereqs_completed, :courses_wanted
+    attr_reader :student_id, :num_units_done, :num_courses_wanted, :prereqs_completed, :courses_wanted, :courses_enrolled_in
     def initialize(student_id, num_units_done, num_courses_wanted, prereqs_completed, courses_wanted)
         @student_id = student_id
         @num_units_done = num_units_done

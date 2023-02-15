@@ -60,7 +60,6 @@ module ClassEnroll
             @@courses.each do |course_num, course|
                 course.sections.each do |section_num, section|
                     balance = course.max_enroll - section.num_studs_enrolled
-                    @@total_students_enrolled += section.num_studs_enrolled
 
                     if section.num_studs_enrolled < course.min_enroll
                         status = "Cancel"
@@ -71,6 +70,7 @@ module ClassEnroll
                     end
 
                     csv << [course_num, section_num, section.students.join(";"), section.num_studs_enrolled.to_s, balance.to_s, status]
+                end
             end
         end
 
@@ -93,7 +93,6 @@ module ClassEnroll
             csv << headers
             @@students.each do |id, student|
                 csv << [id, student.courses_enrolled_in.join(";"), student.num_courses_wanted.to_s, "TBD"]
-                #row = id + "," + student.courses_enrolled_in.join(";") + "," + student.num_courses_wanted.to_s + "," + "TBD"
             end
         end
         # File.open(outcsv, "w") {|f| f.write(headers)}
@@ -111,12 +110,17 @@ module ClassEnroll
         #     File.delete(outcsv)
         # end
 
+        @@students.each do |id, student|
+            if student.courses_enrolled_in.length != 0
+                @@total_students_enrolled += 1
+            end
+        end
+
         File.open(outcsv, "w") { |f|
             f.write("Number of students: " + @@total_students_enrolled.to_s + "\n")
             f.write("Number of course sections that can run: " + @@total_sections_torun.to_s + "\n")
-            f.write("Number of course sections that may be cancelled: " + @total_sections_tocancel.to_s + "\n")
+            f.write("Number of course sections that may be cancelled: " + @@total_sections_tocancel.to_s + "\n")
         }
-    
 
     end
 
@@ -133,15 +137,18 @@ module ClassEnroll
     def meets_prereqs(student, course)
         # checks if the course has no prerequisites
         if course.prereq_courses.length() == 1 and course.prereq_courses.include? "None"
+            print "m_p: first true return\n"
             return true
         end
 
         # if the course does have prerequisites, checks if the student meets them
         course.prereq_courses.each do |preq_course|
             if not(student.prereqs_completed.include? preq_course)
+                print "m_p: first false return\n"
                 return false
             end
         end
+        print "m_p: second true return\n"
         return true
     end
 
@@ -159,10 +166,8 @@ module ClassEnroll
             if check_course_choices(student)
                 student.courses_wanted.each do |course_id|
                     course = @@courses[course_id]
-                    if meets_prereqs(student, course) and 
-                        (student.courses_enrolled_in.length == 2 or 
-                        student.courses_enrolled_in.length == student.num_courses_wanted)
 
+                    if meets_prereqs(student, course) and student.courses_enrolled_in.length < student.num_courses_wanted
                         course.enroll_student(student)
                     end
                     # print "Before meets_prereq: " + course_id, "\n"

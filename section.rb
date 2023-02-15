@@ -8,11 +8,12 @@ class Section
         @course_num = course_num
         @section_num = section_num
         @num_studs_enrolled = 0
-        @students = Hash.new
+        @students = Array.new
     end
 
-    def add_student(student_id, student)
-        @students.store(student_id, student)
+    def add_student(student)
+        print "a_s:  Student ID: " + student.student_id, "\n"
+        @students.push(student.student_id)
         @num_studs_enrolled += 1
     end
 
