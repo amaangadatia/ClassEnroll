@@ -17,11 +17,11 @@ class Course
     # checks if a section for a course needs to be created
     def get_section_to_put_student_in
         # create section if no section exists
-        print "get_section: In method\n"
+        # print "get_section: In method\n"
         if @sections.length == 0
             section = Section.new(course_num, 1)
             @sections.store(1, section)
-            print "section = " + section.to_s, "\n"
+            # print "section = " + section.to_s, "\n"
             return section
         end
 
@@ -29,7 +29,7 @@ class Course
         # returns a section if it hasn't reached it's minimum enrollment
         @sections.each do |section_num, section|
             if section.num_studs_enrolled < @min_enroll
-                print "section 2 = " + section.to_s, "\n" 
+                # print "section 2 = " + section.to_s, "\n" 
                 return section
             end
             last_section_num = section_num
@@ -41,7 +41,7 @@ class Course
             new_section_number = last_section_num + 1
             section = Section.new(course_num, new_section_number)
             @sections.store(new_section_number, section)
-            print "section 3 = " + section.to_s, "\n"
+            # print "section 3 = " + section.to_s, "\n"
             return section
         end      
 
@@ -49,19 +49,30 @@ class Course
         @sections = @sections.sort_by {|section_num, section| [section.num_studs_enrolled, section.section_num]}.to_h
         
         # TODO: check for section exceeding it's max enrollment
+        @sections.each do |section_num, section|
+            if section.num_studs_enrolled < max_enroll
+                return section
+            end
+        end
 
-        print "section 4 = " + section.to_s, "\n"
-        return @sections.values[0]
-        
+        # print "section 4 = " + section.to_s, "\n"
+        # return @sections.values[0]
+        return nil
     end
 
     
     def enroll_student(student)
-        print "e_s: In method\n"
+        # print "e_s: In method\n"
         section = get_section_to_put_student_in
         # TODO: if section is NULL, give reason for not enrolling student
-        print "e_s: section = " + section.to_s, "\n"
+        if section.nil?
+            print "In section nil\n", 
+            student.reason = "Full"
+            return
+        end
 
+        # print "e_s: section = " + section.to_s, "\n"
+        print "ID = " + student.student_id, "\n"
         # add student to section
         section.add_student(student)
 

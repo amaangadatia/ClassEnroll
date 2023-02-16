@@ -17,6 +17,11 @@ module ClassEnroll
     def store_student_data
         incsv = ARGV[0]
         CSV.foreach((incsv), headers: true, col_sep: ",") do |row|
+            # print row
+            # print "Student ID = " + row["StudentId"].to_s, "\n"
+            # print "Units = " + row["Units"], "\n"
+            # print "Choices = " + row["Choices"], "\n\n"
+
             student = Student.new(row["StudentId"].to_s, row["Units"].to_i, row["Num-Courses"].to_i, row["Prereqs"].to_s, row["Choices"].to_s)
             @@students.store(row["StudentId"], student)
         end
@@ -50,10 +55,6 @@ module ClassEnroll
     def output_courses_enroll_plan
         outcsv = ARGV[2]
 
-        # if File.exists?(outcsv)
-        #     File.delete(outcsv)
-        # end
-
         headers = ["Course-Num","Section-Num","Roster","Num-Enroll","Balance","Status"]
         CSV.open(outcsv, "w") do |csv|
             csv << headers
@@ -84,15 +85,11 @@ module ClassEnroll
     def output_students_enroll_plan
         outcsv = ARGV[3]
 
-        # if File.exists?(outcsv)
-        #     File.delete(outcsv)
-        # end
-
         headers = ["StudentId","Courses","Num-Req","Reason"]
         CSV.open(outcsv, "w") do |csv|
             csv << headers
             @@students.each do |id, student|
-                csv << [id, student.courses_enrolled_in.join(";"), student.num_courses_wanted.to_s, "TBD"]
+                csv << [id, student.courses_enrolled_in.join(";"), student.num_courses_wanted.to_s, student.reason]
             end
         end
         # File.open(outcsv, "w") {|f| f.write(headers)}
@@ -105,10 +102,6 @@ module ClassEnroll
 
     def output_summary_enroll_plan
         outcsv = ARGV[4]
-
-        # if File.exists?(outcsv)
-        #     File.delete(outcsv)
-        # end
 
         @@students.each do |id, student|
             if student.courses_enrolled_in.length != 0
@@ -124,7 +117,7 @@ module ClassEnroll
 
     end
 
-    # checks if student submitted course requests
+    # checks if student submitted 5 course requests and didn't put any "None"
     def check_course_choices(student)
         if student.num_courses_wanted > 0 and not(student.courses_wanted.include? "None")
             return true
@@ -137,18 +130,18 @@ module ClassEnroll
     def meets_prereqs(student, course)
         # checks if the course has no prerequisites
         if course.prereq_courses.length() == 1 and course.prereq_courses.include? "None"
-            print "m_p: first true return\n"
+            # print "m_p: first true return\n"
             return true
         end
 
         # if the course does have prerequisites, checks if the student meets them
         course.prereq_courses.each do |preq_course|
             if not(student.prereqs_completed.include? preq_course)
-                print "m_p: first false return\n"
+                # print "m_p: first false return\n"
                 return false
             end
         end
-        print "m_p: second true return\n"
+        # print "m_p: second true return\n"
         return true
     end
 
@@ -167,14 +160,14 @@ module ClassEnroll
                 student.courses_wanted.each do |course_id|
                     course = @@courses[course_id]
 
-                    if meets_prereqs(student, course) and student.courses_enrolled_in.length < student.num_courses_wanted
+                    if meets_prereqs(student, course) and student.courses_enrolled_in.length < student.num_courses_wanted and student.courses_enrolled_in.length < 2
                         course.enroll_student(student)
                     end
                     # print "Before meets_prereq: " + course_id, "\n"
                     # print id, meets_prereqs(student, course_id), "\n"
                 end
             else
-                print "Student " + id.to_s + " has no choices.\n"
+                # print "Student " + id.to_s + " has no choices.\n"
             end
         end
     end

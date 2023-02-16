@@ -4,6 +4,7 @@ class Student
     #include ClassEnroll
 
     attr_reader :student_id, :num_units_done, :num_courses_wanted, :prereqs_completed, :courses_wanted, :courses_enrolled_in
+    attr_accessor :reason
     def initialize(student_id, num_units_done, num_courses_wanted, prereqs_completed, courses_wanted)
         @student_id = student_id
         @num_units_done = num_units_done
@@ -11,6 +12,7 @@ class Student
         @prereqs_completed = prereqs_completed.split(";")
         @courses_wanted = courses_wanted.split(";")
         @courses_enrolled_in = Array.new
+        @reason = "N/A"
 =begin
         print prereqs_completed
         puts

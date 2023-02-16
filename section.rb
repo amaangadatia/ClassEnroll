@@ -12,7 +12,7 @@ class Section
     end
 
     def add_student(student)
-        print "a_s:  Student ID: " + student.student_id, "\n"
+        # print "a_s:  Student ID: " + student.student_id, "\n"
         @students.push(student.student_id)
         @num_studs_enrolled += 1
     end
