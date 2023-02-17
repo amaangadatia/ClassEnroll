@@ -18,9 +18,9 @@ Last modified on: 2/16/23
 
 class Student
     attr_reader :student_id, :num_units_done, :num_courses_wanted, :prereqs_completed, :courses_wanted, :courses_enrolled_in
-    attr_accessor :valid_request, :reason   # the reason for why a student wasn't enrolled in a course section can vary, 
+    attr_accessor :valid_request, :reason   # The reason for why a student wasn't enrolled in a course section can vary, 
                                             # which is why get and set methods are needed for it. Same reasoning for 
-                                            # checking if a student made a valid course request
+                                            # checking if a student made a valid course request.
 
     def initialize(student_id, num_units_done, num_courses_wanted, prereqs_completed, courses_wanted)
         @student_id = student_id
@@ -30,7 +30,7 @@ class Student
         @courses_wanted = courses_wanted.split(";")
         @courses_enrolled_in = Array.new
         @valid_request = false
-        @reason = "N/A"                # the default reason if a student gets enrolled in the course(s) they requested
+        @reason = ""                # the default reason if a student gets enrolled in the course(s) they requested
     end
 
     # adds the course that the student was enrolled in into an array of courses the Student is enrolled in

@@ -110,8 +110,6 @@ module ClassEnroll
         @@students.each do |id, student|
             if student.valid_request == true
                 @@total_students_enrolled += 1
-            # else
-            #     print "Row: " + id + "," + student.courses_enrolled_in.join(";") + "," + student.num_courses_wanted.to_s + "," + student.reason, "\n"
             end
         end
 
@@ -126,7 +124,6 @@ module ClassEnroll
         print "Number of course sections that can run: " + @@total_sections_torun.to_s + "\n"
         print "Number of course sections that may be cancelled: " + @@total_sections_tocancel.to_s + "\n"
         print "********************************************************************\n"
-
     end
 
     # checks if a student submitted 5 course requests and didn't put any of them as "None"
@@ -135,6 +132,7 @@ module ClassEnroll
         if student.num_courses_wanted > 0 and not(student.courses_wanted.include? "None")
             return true
         else
+            student.reason = "Didn't provide 5 valid course choices"
             return false
         end
     end
@@ -185,11 +183,16 @@ module ClassEnroll
                     if meets_prereqs(student, course) and student.courses_enrolled_in.length < student.num_courses_wanted and student.courses_enrolled_in.length < 2
                         course.enroll_student(student)
                     end
+
+                    # if a student got the number of courses they requested or got a max of 2 courses,
+                    # their reason is N/A
+                    if student.courses_enrolled_in.length == student.num_courses_wanted or student.courses_enrolled_in.length == 2
+                        student.reason = "N/A"
+                    end
                 end
             end
         end
     end
-
 end
 
 
