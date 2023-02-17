@@ -24,6 +24,9 @@
 * If a student is not placed into all the courses they requested, the only reason given to them is that the course’s sections were “Full.” 
 
 * Some students don’t get at least one course if they requested one or more courses.
+
+* For some students who requested more than one course and didn’t get any courses, their “Reason” shows as N/A (which is only given to students who got the number of courses they requested).
+
 * For some students who got the number of courses they requested, the “Reason” column for them might say “Full” even though they got the number of courses they wanted.
 
 * The user must type in the names of the input files they intend to be processed CORRECTLY, otherwise the program will shut down.
