@@ -108,8 +108,10 @@ module ClassEnroll
         outcsv = outcsv.chomp
 
         @@students.each do |id, student|
-            if student.courses_enrolled_in.length != 0
+            if student.valid_request == true
                 @@total_students_enrolled += 1
+            # else
+            #     print "Row: " + id + "," + student.courses_enrolled_in.join(";") + "," + student.num_courses_wanted.to_s + "," + student.reason, "\n"
             end
         end
 
@@ -118,6 +120,13 @@ module ClassEnroll
             f.write("Number of course sections that can run: " + @@total_sections_torun.to_s + "\n")
             f.write("Number of course sections that may be cancelled: " + @@total_sections_tocancel.to_s + "\n")
         }
+
+        print "\n******************** SUMMARY OF ENROLLMENT PLAN ********************\n"
+        print "Number of students: " + @@total_students_enrolled.to_s + "\n"
+        print "Number of course sections that can run: " + @@total_sections_torun.to_s + "\n"
+        print "Number of course sections that may be cancelled: " + @@total_sections_tocancel.to_s + "\n"
+        print "********************************************************************\n"
+
     end
 
     # checks if a student submitted 5 course requests and didn't put any of them as "None"
@@ -161,6 +170,15 @@ module ClassEnroll
                 # loops through each student's list of requested courses
                 student.courses_wanted.each do |course_id|
                     course = @@courses[course_id]
+
+                    # verifies that student makes a valid course request
+                    # even if out of a student's course choices they requested one invalild (nonexisting) course,
+                    # the student will not be counted in the "Number of students" output in the summary of the enrollment plan
+                    if course.nil?
+                        student.valid_request = false
+                    else
+                        student.valid_request = true
+                    end
 
                     # enrolls a student in a requested course, but making sure they don't get enrolled in more than 2 courses and
                     # more than the number of courses they requested
