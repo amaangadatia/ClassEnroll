@@ -19,6 +19,9 @@ Last modified on: 2/16/23
 require_relative 'section'
 
 class Course
+    @@courses = Hash.new
+    @@total_sections_torun = 0
+    @@total_sections_tocancel = 0
     attr_reader :course_num, :num_sections, :min_enroll, :max_enroll, :prereq_courses, :sections
     def initialize(course_num, num_sections, min_enroll, max_enroll, prereq_courses)
         @course_num = course_num
@@ -27,6 +30,70 @@ class Course
         @max_enroll = max_enroll
         @prereq_courses = prereq_courses.split(";")
         @sections = Hash.new                        # a hash of sections within a particular course
+    end
+
+    def self.courses
+        @@courses
+    end
+
+    def self.total_sections_torun
+        @@total_sections_torun
+    end
+
+    def self.total_sections_tocancel
+        @@total_sections_tocancel
+    end
+
+    # reads course data from user specified name of a csv input file line by line,
+    # stores each course's data in a Course object,
+    # and then stores each Course in a hash of Course objects
+    def self.store_course_data
+        incsv = ""
+
+        # checks if input file exists; if not, reprompts user to reenter file name
+        loop do
+            print "Please type the name of the INPUT file containing COURSES OFFERED, including .csv extension: \n"
+            incsv = gets
+            incsv = incsv.chomp
+            
+            if not File.exists?(incsv)
+                print "Error: File " + incsv + " doesn't exist. Please specify a valid file name. \n"
+            else
+                break
+            end
+        end
+        
+        CSV.foreach((incsv), headers: true, col_sep: ",") do |row|
+            course = Course.new(row["Course-Num"].to_s, row["Num-Sections"].to_i, row["Min-Enroll"].to_i, row["Max-Enroll"].to_i, row["Prerequisites"].to_s)
+            @@courses.store(row["Course-Num"], course)
+        end
+    end
+
+    # writes the enrollment plan per course to a csv file and outputs the file
+    def self.output_courses_enroll_plan
+        print "\nPlease type the name of the file of where to OUTPUT the enrollment plan PER COURSE, including .csv extension: \n"
+        outcsv = gets
+        outcsv = outcsv.chomp
+
+        headers = ["Course-Num","Section-Num","Roster","Num-Enroll","Balance","Status"]
+        CSV.open(outcsv, "w") do |csv|
+            csv << headers
+            Course.courses.each do |course_num, course|
+                course.sections.each do |section_num, section|
+                    balance = course.max_enroll - section.num_studs_enrolled
+
+                    if section.num_studs_enrolled < course.min_enroll
+                        status = "Cancel"
+                        @@total_sections_tocancel += 1
+                    else
+                        status = "Ok"
+                        @@total_sections_torun += 1
+                    end
+
+                    csv << [course_num, section_num, section.students.join(";"), section.num_studs_enrolled.to_s, balance.to_s, status]
+                end
+            end
+        end
     end
 
     # returns the section of a course in which a student is to be placed in

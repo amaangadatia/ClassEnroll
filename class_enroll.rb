@@ -17,97 +17,22 @@ Last modified on: 2/16/23
 
 =end
 
-#!/usr/bin/env ruby
 require 'csv'
 require_relative 'student'
 require_relative 'course'
 require_relative 'section'
 
-module ClassEnroll
+class ClassEnroll
 
-    @@students = Hash.new
-    @@courses = Hash.new
     @@total_students_enrolled = 0
-    @@total_sections_torun = 0
-    @@total_sections_tocancel = 0
-
-    # reads course data from user specified name of a csv input file line by line,
-    # stores each course's data in a Course object,
-    # and then stores each Course in a hash of Course objects
-    def store_course_data
-        print "Please type the name of the INPUT file containing COURSES OFFERED, including .csv extension: \n"
-        incsv = gets
-        incsv = incsv.chomp
-        
-        CSV.foreach((incsv), headers: true, col_sep: ",") do |row|
-            course = Course.new(row["Course-Num"].to_s, row["Num-Sections"].to_i, row["Min-Enroll"].to_i, row["Max-Enroll"].to_i, row["Prerequisites"].to_s)
-            @@courses.store(row["Course-Num"], course)
-        end
-    end
-
-    # reads student data from user specified name of a csv input file line by line,
-    # stores each student's data in a Student object, 
-    # and then stores each Student in a hash of Student objects
-    def store_student_data
-        print "\nPlease type the name of the INPUT file containing STUDENTS' REQUESTS, including .csv extension: \n"
-        incsv = gets
-        incsv = incsv.chomp
-
-        CSV.foreach((incsv), headers: true, col_sep: ",") do |row|
-            student = Student.new(row["StudentId"].to_s, row["Units"].to_i, row["Num-Courses"].to_i, row["Prereqs"].to_s, row["Choices"].to_s)
-            @@students.store(row["StudentId"], student)
-        end
-    end
-
-    # writes the enrollment plan per course to a csv file and outputs the file
-    def output_courses_enroll_plan
-        print "\nPlease type the name of the file of where to OUTPUT the enrollment plan PER COURSE, including .csv extension: \n"
-        outcsv = gets
-        outcsv = outcsv.chomp
-
-        headers = ["Course-Num","Section-Num","Roster","Num-Enroll","Balance","Status"]
-        CSV.open(outcsv, "w") do |csv|
-            csv << headers
-            @@courses.each do |course_num, course|
-                course.sections.each do |section_num, section|
-                    balance = course.max_enroll - section.num_studs_enrolled
-
-                    if section.num_studs_enrolled < course.min_enroll
-                        status = "Cancel"
-                        @@total_sections_tocancel += 1
-                    else
-                        status = "Ok"
-                        @@total_sections_torun += 1
-                    end
-
-                    csv << [course_num, section_num, section.students.join(";"), section.num_studs_enrolled.to_s, balance.to_s, status]
-                end
-            end
-        end
-    end
-
-    # writes the enrollment plan per student to a csv file and outputs the file
-    def output_students_enroll_plan
-        print "\nPlease type the name of the file of where to OUTPUT the enrollment plan PER STUDENT, including .csv extension: \n"
-        outcsv = gets
-        outcsv = outcsv.chomp
-
-        headers = ["StudentId","Courses","Num-Req","Reason"]
-        CSV.open(outcsv, "w") do |csv|
-            csv << headers
-            @@students.each do |id, student|
-                csv << [id, student.courses_enrolled_in.join(";"), student.num_courses_wanted.to_s, student.reason]
-            end
-        end
-    end
 
     # writes the overall summary of the enrollment plan of students and courses to a txt file and outputs the file
-    def output_summary_enroll_plan
+    def self.output_summary_enroll_plan
         print "\nPlease type the name of the file of where to OUTPUT the ENROLLMENT PLAN SUMMARY, including .txt extension: \n"
         outcsv = gets
         outcsv = outcsv.chomp
 
-        @@students.each do |id, student|
+        Student.students.each do |id, student|
             if student.valid_request == true
                 @@total_students_enrolled += 1
             end
@@ -115,20 +40,20 @@ module ClassEnroll
 
         File.open(outcsv, "w") { |f|
             f.write("Number of students: " + @@total_students_enrolled.to_s + "\n")
-            f.write("Number of course sections that can run: " + @@total_sections_torun.to_s + "\n")
-            f.write("Number of course sections that may be cancelled: " + @@total_sections_tocancel.to_s + "\n")
+            f.write("Number of course sections that can run: " + Course.total_sections_torun.to_s + "\n")
+            f.write("Number of course sections that may be cancelled: " + Course.total_sections_tocancel.to_s + "\n")
         }
 
         print "\n******************** SUMMARY OF ENROLLMENT PLAN ********************\n"
         print "Number of students: " + @@total_students_enrolled.to_s + "\n"
-        print "Number of course sections that can run: " + @@total_sections_torun.to_s + "\n"
-        print "Number of course sections that may be cancelled: " + @@total_sections_tocancel.to_s + "\n"
+        print "Number of course sections that can run: " + Course.total_sections_torun.to_s + "\n"
+        print "Number of course sections that may be cancelled: " + Course.total_sections_tocancel.to_s + "\n"
         print "********************************************************************\n"
     end
 
     # checks if a student submitted 5 course requests and didn't put any of them as "None"
     # returns a boolean value
-    def check_course_choices(student)
+    def self.check_course_choices(student)
         if student.num_courses_wanted > 0 and not(student.courses_wanted.include? "None")
             return true
         else
@@ -139,7 +64,7 @@ module ClassEnroll
 
     # checks if a student meets the prerequisites for a course
     # returns a boolean value
-    def meets_prereqs(student, course)
+    def self.meets_prereqs(student, course)
         # checks if the course has no prerequisites
         if course.prereq_courses.length() == 1 and course.prereq_courses.include? "None"
             return true
@@ -156,18 +81,18 @@ module ClassEnroll
     end
 
     # generates the enrollment plan for every student and every course
-    def generate_enroll_plan
+    def self.generate_enroll_plan
         # sorts students by number of units completed in descending order
         # so priority goes to student(s) with higher amount of units
-        @@students.sort_by {|id, student| -student.num_units_done}
+        Student.students.sort_by {|id, student| -student.num_units_done}
 
         # loops through each student in the Student hash
-        @@students.each do |id, student|
+        Student.students.each do |id, student|
             # verify their course choices
             if check_course_choices(student)
                 # loops through each student's list of requested courses
                 student.courses_wanted.each do |course_id|
-                    course = @@courses[course_id]
+                    course = Course.courses[course_id]
 
                     # verifies that student makes a valid course request
                     # even if out of a student's course choices they requested one invalild (nonexisting) course,
@@ -193,17 +118,4 @@ module ClassEnroll
             end
         end
     end
-end
-
-
-include ClassEnroll
-
-if __FILE__ == $0
-    print "Welcome to the ClassEnroll program!\n\n"
-    store_course_data
-    store_student_data
-    generate_enroll_plan
-    output_courses_enroll_plan
-    output_students_enroll_plan
-    output_summary_enroll_plan
 end
