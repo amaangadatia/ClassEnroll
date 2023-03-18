@@ -13,7 +13,7 @@ Description: This program simulates a portion of a course enrollment system for 
 Filename: class_enroll.rb
 Description: This file contains the main program where input files are processed, students are enrolled in courses, and output files containing
              the enrollment plans by course and by student, as well as an overall summary of the enrollment plan are generated.
-Last modified on: 2/16/23
+Last modified on: 3/18/23
 
 =end
 
@@ -54,7 +54,8 @@ class ClassEnroll
     # checks if a student submitted 5 course requests and didn't put any of them as "None"
     # returns a boolean value
     def self.check_course_choices(student)
-        if student.num_courses_wanted > 0 and not(student.courses_wanted.include? "None")
+        if (student.num_courses_wanted > 0 and student.num_courses_wanted < 6) and student.courses_wanted.length() == 5
+        # if student.num_courses_wanted > 0 and not(student.courses_wanted.include? "None")
             return true
         else
             student.reason = "Didn't provide 5 valid course choices"
@@ -73,6 +74,7 @@ class ClassEnroll
         # if the course does have prerequisites, checks if the student meets them
         course.prereq_courses.each do |preq_course|
             if not(student.prereqs_completed.include? preq_course)
+                student.reason = "Did not meet prereqs for " + course.course_num
                 return false
             end
         end
@@ -92,6 +94,10 @@ class ClassEnroll
             if check_course_choices(student)
                 # loops through each student's list of requested courses
                 student.courses_wanted.each do |course_id|
+                    if course_id == "None"
+                        next
+                    end
+
                     course = Course.courses[course_id]
 
                     # verifies that student makes a valid course request

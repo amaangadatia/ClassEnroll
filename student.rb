@@ -12,7 +12,7 @@ Description: This program simulates a portion of a course enrollment system for 
              the summary of the enrollment plan. 
 Filename: student.rb
 Description: This file contains the class for instantiating a Student object.
-Last modified on: 2/16/23
+Last modified on: 3/12/23
 
 =end
 
