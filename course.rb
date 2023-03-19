@@ -145,8 +145,8 @@ class Course
 
         # if section cannot accept more students, give reason for not enrolling student
         if section.nil? 
-            student.reason = "Full"
-            return
+            student.reason.push(@course_num + " is full")
+            return false
         end
 
         # adds student to section
@@ -154,5 +154,7 @@ class Course
 
         # Update student object with course number they were put in
         student.enrolled_in(@course_num)
+
+        return true
     end
 end

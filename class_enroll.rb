@@ -58,7 +58,7 @@ class ClassEnroll
         # if student.num_courses_wanted > 0 and not(student.courses_wanted.include? "None")
             return true
         else
-            student.reason = "Didn't provide 5 valid course choices"
+            student.reason.push("Didn't provide 5 valid course choices")
             return false
         end
     end
@@ -74,7 +74,7 @@ class ClassEnroll
         # if the course does have prerequisites, checks if the student meets them
         course.prereq_courses.each do |preq_course|
             if not(student.prereqs_completed.include? preq_course)
-                student.reason = "Did not meet prereqs for " + course.course_num
+                student.reason.push("Did not meet prereqs for " + course.course_num)
                 return false
             end
         end
@@ -82,8 +82,14 @@ class ClassEnroll
         return true
     end
 
-    # generates the enrollment plan for every student and every course
-    def self.generate_enroll_plan
+    # enrolls a student in a requested course, but making sure they don't get enrolled 
+    # in more than 2 courses and more than the number of courses they requested
+    def self.meets_enrollment_conditions(student, course)
+        return (meets_prereqs(student, course) and student.courses_enrolled_in.length < student.num_courses_wanted and student.courses_enrolled_in.length < 2)
+    end
+
+    # passes over all students and enrolls them in one course to begin with
+    def self.enroll_in_one_course
         # sorts students by number of units completed in descending order
         # so priority goes to student(s) with higher amount of units
         Student.students.sort_by {|id, student| -student.num_units_done}
@@ -109,19 +115,62 @@ class ClassEnroll
                         student.valid_request = true
                     end
 
-                    # enrolls a student in a requested course, but making sure they don't get enrolled in more than 2 courses and
-                    # more than the number of courses they requested
-                    if meets_prereqs(student, course) and student.courses_enrolled_in.length < student.num_courses_wanted and student.courses_enrolled_in.length < 2
-                        course.enroll_student(student)
-                    end
-
-                    # if a student got the number of courses they requested or got a max of 2 courses,
-                    # their reason is N/A
-                    if student.courses_enrolled_in.length == student.num_courses_wanted or student.courses_enrolled_in.length == 2
-                        student.reason = "N/A"
+                    if meets_enrollment_conditions(student, course)
+                        is_enrolled = course.enroll_student(student)
+                        
+                        # if student got enrolled in their first choice, move to the next student
+                        # to ensure every student gets at least one course to begin with
+                        if is_enrolled == true
+                            break
+                        end
                     end
                 end
             end
         end
+    end
+    
+    # attempts to enroll students in additional courses up to the amount they requested (max of 2)
+    def self.enroll_in_more_courses
+
+        # loops through each student in the Student hash
+        Student.students.each do |id, student|
+            # verify their course choices
+            if check_course_choices(student)
+                # loops through each student's list of requested courses
+                student.courses_wanted.each do |course_id|
+                    if course_id == "None"
+                        next
+                    end
+
+                    course = Course.courses[course_id]
+
+                    # verifies that student makes a valid course request
+                    # even if out of a student's course choices they requested one invalild (nonexisting) course,
+                    # the student will not be counted in the "Number of students" output in the summary of the enrollment plan
+                    if course.nil?
+                        student.valid_request = false
+                    else
+                        student.valid_request = true
+                    end
+
+                   
+                    if meets_enrollment_conditions(student, course)
+                        # if a student is already enrolled in a course, go to the next course
+                        # they requested to determine if they can be enrolled in it
+                        if student.courses_enrolled_in.include? course_id
+                            next
+                        end
+
+                        course.enroll_student(student)
+                    end
+                end
+            end
+        end
+    end
+
+    # generates the enrollment plan for every student and every course
+    def self.generate_enroll_plan
+        enroll_in_one_course
+        enroll_in_more_courses
     end
 end

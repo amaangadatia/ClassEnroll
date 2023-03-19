@@ -31,7 +31,7 @@ class Student
         @courses_wanted = courses_wanted.split(";")
         @courses_enrolled_in = Array.new
         @valid_request = false
-        @reason = ""                # the default reason if a student gets enrolled in the course(s) they requested
+        @reason = Array.new                # the default reason if a student gets enrolled in the course(s) they requested
     end
 
     def self.students
@@ -73,7 +73,13 @@ class Student
         CSV.open(outcsv, "w") do |csv|
             csv << headers
             Student.students.each do |id, student|
-                csv << [id, student.courses_enrolled_in.join(";"), student.num_courses_wanted.to_s, student.reason]
+                # if a student got the number of courses they requested or got a max of 2 courses,
+                # their reason is N/A
+                if student.courses_enrolled_in.length == student.num_courses_wanted or student.courses_enrolled_in.length == 2
+                    student.reason.push("N/A")
+                end
+                
+                csv << [id, student.courses_enrolled_in.join(";"), student.num_courses_wanted.to_s, student.reason.join(";")]
             end
         end
     end
