@@ -13,7 +13,7 @@ Description: This program simulates a portion of a course enrollment system for 
 Filename: class_enroll.rb
 Description: This file contains the main program where input files are processed, students are enrolled in courses, and output files containing
              the enrollment plans by course and by student, as well as an overall summary of the enrollment plan are generated.
-Last modified on: 3/18/23
+Last modified on: 3/20/23
 
 =end
 
@@ -51,7 +51,8 @@ class ClassEnroll
         print "********************************************************************\n"
     end
 
-    # checks if a student submitted 5 course requests and didn't put any of them as "None"
+    # checks if a student submitted between 1 and 5 (inclusive) course requests and
+    # if they have exactly five course choices in the "Choices" column ("None" is considered a valid chouce)
     # returns a boolean value
     def self.check_course_choices(student)
         if (student.num_courses_wanted > 0 and student.num_courses_wanted < 6) and student.courses_wanted.length() == 5
@@ -100,6 +101,8 @@ class ClassEnroll
             if check_course_choices(student)
                 # loops through each student's list of requested courses
                 student.courses_wanted.each do |course_id|
+                    # if a choice is "None," move to the student's next course choice immediately
+                    # can't do anything with "None," so we don't care about it
                     if course_id == "None"
                         next
                     end
@@ -129,7 +132,7 @@ class ClassEnroll
         end
     end
     
-    # attempts to enroll students in additional courses up to the amount they requested (max of 2)
+    # attempts to enroll students in additional courses if more than one was requested (max of 2)
     def self.enroll_in_more_courses
 
         # loops through each student in the Student hash
@@ -138,6 +141,8 @@ class ClassEnroll
             if check_course_choices(student)
                 # loops through each student's list of requested courses
                 student.courses_wanted.each do |course_id|
+                    # if a choice is "None," move to the student's next course choice immediately
+                    # can't do anything with "None," so we don't care about it
                     if course_id == "None"
                         next
                     end

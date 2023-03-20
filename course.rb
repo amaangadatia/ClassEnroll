@@ -12,7 +12,7 @@ Description: This program simulates a portion of a course enrollment system for 
              the summary of the enrollment plan. 
 Filename: course.rb
 Description: This file contains the class for instantiating a Course object.
-Last modified on: 3/12/23
+Last modified on: 3/20/23
 
 =end
 
@@ -32,14 +32,17 @@ class Course
         @sections = Hash.new                        # a hash of sections within a particular course
     end
 
+    # returns the hash of courses
     def self.courses
         @@courses
     end
 
+    # returns the total number of course sections to run
     def self.total_sections_torun
         @@total_sections_torun
     end
 
+    # returns the total number of course sections to cancel
     def self.total_sections_tocancel
         @@total_sections_tocancel
     end

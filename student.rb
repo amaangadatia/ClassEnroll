@@ -12,7 +12,7 @@ Description: This program simulates a portion of a course enrollment system for 
              the summary of the enrollment plan. 
 Filename: student.rb
 Description: This file contains the class for instantiating a Student object.
-Last modified on: 3/12/23
+Last modified on: 3/20/23
 
 =end
 
@@ -34,6 +34,7 @@ class Student
         @reason = Array.new                # the default reason if a student gets enrolled in the course(s) they requested
     end
 
+    # returns the hash of students
     def self.students
         @@students
     end
