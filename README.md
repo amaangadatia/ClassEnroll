@@ -4,7 +4,7 @@
 
 * Before starting, make sure that the input files for the student requests and the courses offered, respectively, are in the same directory as the source code files.
 
-* To run the program, enter “ruby class_enroll.rb” on the command line.
+* To run the program, enter “ruby main.rb” on the command line.
 
 * When prompted, enter the NAME of the INPUT FILE containing the COURSES BEING OFFERED to be processed, INCLUDING the .csv extension.
 * When prompted, enter the NAME of the INPUT FILE containing the REQUESTS OF STUDENTS to be processed, INCLUDING the .csv extension.
@@ -25,14 +25,11 @@
 
 * Students who didn’t provide 5 valid course choices don’t get at least one course.
 
-* Some students don’t get at least one course if they requested one or more courses.
-
 * Priority for a student who requests an upper level course, meets its prerequisites, but doesn’t provide 5 valid choices is not reduced (i.e. not accounted for).
 
-* The user must type in the names of the input files they intend to be processed CORRECTLY, otherwise the program will shut down.
-  * Additionally, when prompted, the names of input files must also have their respective extension attached to it (.csv or .txt).
+* When prompted, the names of input files must also have their respective extension attached to it (.csv or .txt).
 
-* The input files must be located IN THE SAME DIRECTORY as the program source code files, otherwise the program will not recognize their names even if they’re typed correctly by the user and will shut down.
+* The input files must be located IN THE SAME DIRECTORY as the program source code files, otherwise the program will not recognize their names even if they’re typed correctly by the user.
 
 * If the input csv files have a Carriage Return (CR or \r) on each line in addition to the newline character (\n), the data in the first column of each file (student IDs in the students’ requests file and the course numbers in the courses offered file, respectively) appear as blanks to the program, which will cause the program to crash.
   * Make sure to eliminate the CR characters on each line in the input csv files intended to be processed by opening the files in a text editor or VS Code, removing the CR characters, and saving the files as plain text with the same .csv extension. DO NOT eliminate the newline (\n) characters.
