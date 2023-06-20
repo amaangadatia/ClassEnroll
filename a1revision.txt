@@ -1,0 +1,65 @@
+Script started on 2023-03-20 19:32:35-04:00
+]0;student1@csc415-server07:~/vm-csc415/assignment1-rev[student1@csc415-server07 assignment1-rev]$ [K[student1@csc415-server07 assignment1-rev]$ git push[Kruby main.rb
+Welcome to the ClassEnroll program!
+
+Please type the name of the INPUT file containing COURSES OFFERED, including .csv extension: 
+abc,t  .txt
+Error: File abc.txt doesn't exist. Please specify a valid file name. 
+Please type the name of the INPUT file containing COURSES OFFERED, including .csv extension: 
+courses_offered.csv
+
+Please type the name of the INPUT file containing STUDENTS' REQUESTS, including .csv extension: 
+def.txt
+Error: File def.txt doesn't exist. Please specify a valid file name. 
+
+Please type the name of the INPUT file containing STUDENTS' REQUESTS, including .csv extension: 
+student_requests.csv
+
+Please type the name of the file of where to OUTPUT the enrollment plan PER COURSE, including .csv extension: 
+cout.s csv
+
+Please type the name of the file of where to OUTPUT the enrollment plan PER STUDENT, including .csv extension: 
+sout.csv
+
+Please type the name of the file of where to OUTPUT the ENROLLMENT PLAN SUMMARY, including .txt extension: 
+enroll.txt
+
+******************** SUMMARY OF ENROLLMENT PLAN ********************
+Number of students: 415
+Number of course sections that can run: 29
+Number of course sections that may be cancelled: 6
+********************************************************************
+]0;student1@csc415-server07:~/vm-csc415/assignment1-rev[student1@csc415-server07 assignment1-rev]$ [K[student1@csc415-server07 assignment1-rev]$ [K[student1@csc415-server07 assignment1-rev]$ ruby main.rb
+Welcome to the ClassEnroll program!
+
+Please type the name of the INPUT file containing COURSES OFFERED, including .csv extension: 
+abc, .csv
+Error: File abc.csv doesn't exist. Please specify a valid file name. 
+Please type the name of the INPUT file containing COURSES OFFERED, including .csv extension: 
+cor urses_offered.csv
+
+Please type the name of the INPUT file containing STUDENTS' REQUESTS, including .csv extension: 
+def.csv
+Error: File def.csv doesn't exist. Please specify a valid file name. 
+
+Please type the name of the INPUT file containing STUDENTS' REQUESTS, including .csv extension: 
+student_requests.csv
+
+Please type the name of the file of where to OUTPUT the enrollment plan PER COURSE, including .csv extension: 
+cout.csv
+
+Please type the name of the file of where to OUTPUT the enrollment plan PER STUDENT, including .csv extension: 
+sout.csv
+
+Please type the name of the file of where to OUTPUT the ENROLLMENT PLAN SUMMARY, including .txt extension: 
+enroll.txt
+
+******************** SUMMARY OF ENROLLMENT PLAN ********************
+Number of students: 581
+Number of course sections that can run: 38
+Number of course sections that may be cancelled: 7
+********************************************************************
+]0;student1@csc415-server07:~/vm-csc415/assignment1-rev[student1@csc415-server07 assignment1-rev]$ [K[student1@csc415-server07 assignment1-rev]$ [K[student1@csc415-server07 assignment1-rev]$ exit
+exit
+
+Script done on 2023-03-20 19:37:44-04:00

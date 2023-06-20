@@ -10,26 +10,21 @@ Description: This program simulates a portion of a course enrollment system for 
              other containing the courses that will be offered in the upcoming semester. It then outputs three files: one csv file containing
              the enrollment plan for each course, one csv file containing the enrollment plan for each student, and one text file containing
              the summary of the enrollment plan. 
-Filename: section.rb
-Description: This file contains the class for instantiating a [Course] Section object.
-Last modified on: 3/12/23
+Filename: main.rb
+Description: This file contains the main program which runs the application.
+Last modified on: 3/18/23
 
 =end
 
-require_relative 'student'
+#!/usr/bin/env ruby
+require_relative 'class_enroll'
 
-class Section
-    attr_reader :course_num, :section_num, :num_studs_enrolled, :students
-    def initialize(course_num, section_num)
-        @course_num = course_num
-        @section_num = section_num
-        @num_studs_enrolled = 0
-        @students = Array.new       # an array of IDs representing Students enrolled in the course section, aka "the roster"
-    end
-
-    # adds a student to a course section and increments the roster count by 1
-    def add_student(student)
-        @students.push(student.student_id)
-        @num_studs_enrolled += 1
-    end
+if __FILE__ == $0
+    print "Welcome to the ClassEnroll program!\n\n"
+    Course.store_course_data
+    Student.store_student_data
+    ClassEnroll.generate_enroll_plan
+    Course.output_courses_enroll_plan
+    Student.output_students_enroll_plan
+    ClassEnroll.output_summary_enroll_plan
 end

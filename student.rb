@@ -12,11 +12,12 @@ Description: This program simulates a portion of a course enrollment system for 
              the summary of the enrollment plan. 
 Filename: student.rb
 Description: This file contains the class for instantiating a Student object.
-Last modified on: 2/16/23
+Last modified on: 3/20/23
 
 =end
 
 class Student
+    @@students = Hash.new
     attr_reader :student_id, :num_units_done, :num_courses_wanted, :prereqs_completed, :courses_wanted, :courses_enrolled_in
     attr_accessor :valid_request, :reason   # The reason for why a student wasn't enrolled in a course section can vary, 
                                             # which is why get and set methods are needed for it. Same reasoning for 
@@ -30,7 +31,58 @@ class Student
         @courses_wanted = courses_wanted.split(";")
         @courses_enrolled_in = Array.new
         @valid_request = false
-        @reason = ""                # the default reason if a student gets enrolled in the course(s) they requested
+        @reason = Array.new                # the default reason if a student gets enrolled in the course(s) they requested
+    end
+
+    # returns the hash of students
+    def self.students
+        @@students
+    end
+
+    # reads student data from user specified name of a csv input file line by line,
+    # stores each student's data in a Student object, 
+    # and then stores each Student in a hash of Student objects
+    def self.store_student_data
+        incsv = ""
+
+        # checks if input file exists; if not, reprompts user to reenter file name
+        loop do
+            print "\nPlease type the name of the INPUT file containing STUDENTS' REQUESTS, including .csv extension: \n"
+            incsv = gets
+            incsv = incsv.chomp
+            
+            if not File.exists?(incsv)
+                print "Error: File " + incsv + " doesn't exist. Please specify a valid file name. \n"
+            else
+                break
+            end
+        end
+
+        CSV.foreach((incsv), headers: true, col_sep: ",") do |row|
+            student = Student.new(row["StudentId"].to_s, row["Units"].to_i, row["Num-Courses"].to_i, row["Prereqs"].to_s, row["Choices"].to_s)
+            @@students.store(row["StudentId"], student)
+        end
+    end
+
+    # writes the enrollment plan per student to a csv file and outputs the file
+    def self.output_students_enroll_plan
+        print "\nPlease type the name of the file of where to OUTPUT the enrollment plan PER STUDENT, including .csv extension: \n"
+        outcsv = gets
+        outcsv = outcsv.chomp
+
+        headers = ["StudentId","Courses","Num-Req","Reason"]
+        CSV.open(outcsv, "w") do |csv|
+            csv << headers
+            Student.students.each do |id, student|
+                # if a student got the number of courses they requested or got a max of 2 courses,
+                # their reason is N/A
+                if student.courses_enrolled_in.length == student.num_courses_wanted or student.courses_enrolled_in.length == 2
+                    student.reason.push("N/A")
+                end
+                
+                csv << [id, student.courses_enrolled_in.join(";"), student.num_courses_wanted.to_s, student.reason.join(";")]
+            end
+        end
     end
 
     # adds the course that the student was enrolled in into an array of courses the Student is enrolled in
